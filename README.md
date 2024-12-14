@@ -5,6 +5,7 @@ The aim of this project is to use three different machine learning methods; supp
 
 All packages used:
 
+```
 import pandas as pd
 import numpy as np
 from sklearn.pipeline import Pipeline, make_pipeline
@@ -19,25 +20,36 @@ from sklearn.metrics import roc_curve, auc, accuracy_score, precision_recall_fsc
 from sklearn import set_config
 import pickle
 import matplotlib.pyplot as plt
+```
+
 Import data and check for na values.
 
+```
 df = pd.read_csv("seeds.csv")
 df.head()
 
 df.isna().sum()
+```
 Check for outliers:
 
+```
 df.loc[:,'area':'length of kernel groove'].boxplot(figsize=(20,5))
 plt.show()
-boxplot display of outliers
+```
 
+![boxplot display of outliers](outliers_boxplot.png)
+
+```
 df.loc[:,'area':'length of kernel groove'].hist(bins=10, figsize=(25, 20))
 plt.show()
-histogram display of outliers
+```
+![histogram display of outliers](outliers_hist.png)
 
-Area, perimeter, length of kernel and length of kernel groove appear to be left skewed and could benefit from a log transform.
+Area, perimeter, length of kernel and length of kernel groove appear to be
+left skewed and could benefit from a log transform.
 
-The next step is to prepare the data for modelling, this will be done by converting the wheat to binary and splitting the data into two seperate components so it can be modelled. The binary split will be Kama vs Rosa and Canadian.
+The next step is to prepare the data for modelling, this will be done by
+converting the wheat to binary and splitting the data into two seperate components so it can be modelled. The binary split will be Kama vs Rosa and Canadian.
 
 ```
 mapper = {1: 1, 2: 0, 3: 0}
@@ -49,11 +61,16 @@ y = df['class']
 X = df.drop('class', axis=1)
 ```
 
-Another important component to this preparation is the log transformation mentioned earlier. Robust scaler will also be used to prepare the data for modelling, this subtracts the median and divides by the interquartile range. The importance of this is to make sure all data is on the same scale.
+Another important component to this preparation is the log transformation
+mentioned earlier. Robust scaler will also be used to prepare the data for
+modelling, this subtracts the median and divides by the interquartile range.
+The importance of this is to make sure all data is on the same scale.
 
-These preprocessing techniques are used as they may improve the performance of machine learning models.
+These preprocessing techniques are used as they may improve the performance
+of machine learning models.
 
-The preprocessing pipelines will be prepared next and the data will be divided into train/test sets.
+The preprocessing pipelines will be prepared next and the data will be divided
+into train/test sets.
 
 ```
 columns_left_skew = ['area', 'perimeter', 'length of kernel', 'length of kernel groove']
@@ -85,11 +102,17 @@ preprocess_pipeline = ColumnTransformer(
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=True, stratify=y)
 ```
 
-Modelling will begin, three models will be compared; SVM, random forest and Knn. For each model, the pipeline will be built, then a hyperparameter grid will be created so the best set of hyperparameters can be searched. Finally the best hyperparameter will be saved for use on the test data. Note to avoid confusion - there are two types of test data. The first is implemented when cross validation is used on the training set. The second is a randomly selected set of 20% that will be used at the end to compare models.
+Modelling will begin, three models will be compared; SVM, random forest and Knn.
+For each model, the pipeline will be built, then a hyperparameter grid will be created so the best
+set of hyperparameters can be searched. Finally the best hyperparameter will be saved for use on the test data.
+Note to avoid confusion - there are two types of test data. The first is implemented when cross validation
+is used on the training set. The second is a randomly selected set of 20% that will be used at the end
+to compare models.
 
 Support Vector Machine (SVM)
 
 ```
+# create the pipeline
 # create the pipeline
 pipe = Pipeline(steps=[('preprocess', preprocess_pipeline), ('svm', svm.SVC(probability=True))])
 
@@ -113,9 +136,9 @@ SVM_best_params = search.best_params_
 SVM_best_model = search.best_estimator_
 ```
 
-The printed results were as follows (and are stored for the test in future):
-Best CV score = 0.958
-Best hyperparameters: {'svm__C': 10, 'svm__gamma': 1, 'svm__kernel': 'linear'}
+The printed results were as follows (and are stored for the test in future):  
+Best CV score = 0.958  
+Best hyperparameters:  {'svm__C': 10, 'svm__gamma': 1, 'svm__kernel': 'linear'}
 
 Random Forest
 
@@ -144,9 +167,9 @@ RF_best_params = search.best_params_
 RF_best_model = search.best_estimator_
 ```
 
-The printed results were as follows (and are stored for the test in future):
-Best CV score = 0.940
-Best hyperparameters: {'rf__max_depth': 8, 'rf__n_estimators': 30}
+The printed results were as follows (and are stored for the test in future):  
+Best CV score = 0.940  
+Best hyperparameters:  {'rf__max_depth': 8, 'rf__n_estimators': 30}
 
 Knn
 
@@ -174,11 +197,13 @@ kNN_best_params = search.best_params_
 kNN_best_model = search.best_estimator_
 ```
 
-The printed results were as follows (and are stored for the test in future):
-Best CV score = 0.958
-Best hyperparameter: {'knn__n_neighbors': 3, 'knn__p': 2, 'knn__weights': 'distance'}
+The printed results were as follows (and are stored for the test in future):  
+Best CV score = 0.958  
+Best hyperparameter:  {'knn__n_neighbors': 3, 'knn__p': 2, 'knn__weights': 'distance'}
 
-Now the models will be compared on the test set. Evaluation metrics will be accuracy, precision, recall, f1 score and auc score. ROC curves will also be shown as a visual aid.
+Now the models will be compared on the test set.
+Evaluation metrics will be accuracy, precision, recall, f1 score
+and auc score. ROC curves will also be shown as a visual aid.
 
 ```
 mean_fpr = np.linspace(start=0, stop=1, num=100)
@@ -229,7 +254,7 @@ plt.savefig("results.bar.png")
 plt.show()
 ```
 
-barchart display of results
+![barchart display of results](results.bar.png)
 
 ```
 # plot display results comparison of roc curves with auc values
@@ -245,8 +270,16 @@ plt.savefig("results.roc.png")
 plt.show()
 ```
 
-display of roc curve and auc values
+![display of roc curve and auc values](results.roc.png)
 
 Conclusion
 
 As evidenced by the bar chart that compares performance metrics acorss the three models, SVM and random forest are the leading performers. They also have higher AUC scores than Knn. It is important to note that the conclusions drawn are for the sake of comparison, despite this, all models performed very well. AUC scores are the area under the ROC curve, which compares the true positive rate vs false positive rate for different prediction thresholds of the model used. Anything above 0.5 means the model is useful to some degree. The high scores demonstrate how useful these models are at predicting what wheat the kernels come from.
+
+
+
+
+
+
+
+
